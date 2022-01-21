@@ -4,7 +4,6 @@ import CustomInput from '../../Components/CustomInput'
 import CustomButtom from '../../Components/CustomButton'
 import CustomError from '../../Components/CustomError'
 import SQLite from 'react-native-sqlite-storage'
-import AsyncStorage from '@react-native-async-storage/async-storage'
 
 const db = SQLite.openDatabase(
     {
@@ -49,15 +48,6 @@ const Login = ({ navigation }) => {
         })
     }
 
-    const setActiveUser = async (id) => {
-        try {
-            await AsyncStorage.setItem('active_user_id', String(id))
-            await AsyncStorage.setItem('active_user', email)
-        } catch (error) {
-            console.log(error)
-        }
-    }
-
     const loginPressed = () => {
         if (email == '') setemailError('Email is requierd')
         if (password == '') setpasswordError('Password is requierd')
@@ -69,14 +59,21 @@ const Login = ({ navigation }) => {
                     (tx, results) => {
                         if (results.rows.length > 0) {
                             updateUser(email)
-                            setActiveUser(results.rows.item(0).id)
-                            navigation.replace('Todos', { email: email })
+                            navigation.replace('Todos', { id: results.rows.item(0).id, email: email })
                         }
                         else ToastAndroid.show('Invalid email or password..', ToastAndroid.SHORT)
                     }
                 )
             })
         }
+    }
+
+    const onRegister = () => {
+        navigation.navigate('Register')
+        setemail('')
+        setpassword('')
+        setemailError('')
+        setpasswordError('')
     }
 
     return (
@@ -88,7 +85,7 @@ const Login = ({ navigation }) => {
             {passwordError != '' ? <CustomError message={passwordError} /> : null}
 
             <CustomButtom text="LOGIN" onPress={() => loginPressed()} />
-            <CustomButtom text="Don't have an account? Register here" onPress={() => navigation.navigate('Register')} type='TERTIARY' />
+            <CustomButtom text="Don't have an account? Register here" type='TERTIARY' onPress={() => onRegister()} />
         </View>
     )
 }

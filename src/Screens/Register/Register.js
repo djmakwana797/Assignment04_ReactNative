@@ -48,7 +48,7 @@ const Register = ({navigation}) => {
                 [username, email, password, userToken],
                 (tx, results) => {
                     console.log(results)
-                    results.rowsAffected > 0 ? console.log('Registered Successfully') : console.log('Something went wrong')
+                    results.rowsAffected > 0 ? ToastAndroid.show('Registered Successfully', ToastAndroid.SHORT) : console.log('Something went wrong')
                 }
             )
         })
@@ -66,7 +66,7 @@ const Register = ({navigation}) => {
     }
 
     const onLoginPressed = () => {
-        navigation.goBack()
+        navigation.navigate('Login')
     }
 
     const validateUname = (uname) =>{

@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react'
-import { View, Text, StyleSheet, FlatList, Image, Modal, ScrollView, TextInput, Pressable } from 'react-native'
+import { View, Text, StyleSheet, FlatList, Image, Modal, ScrollView, TextInput, Pressable, disableYellowBox } from 'react-native'
 import ActionButton from 'react-native-action-button'
 import SelectDropdown from 'react-native-select-dropdown'
 import DatePicker from 'react-native-date-picker'
 import SQLite from 'react-native-sqlite-storage'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
-import AsyncStorage from '@react-native-async-storage/async-storage'
+
+console.disableYellowBox = true;
 
 const db = SQLite.openDatabase(
     {
@@ -16,7 +17,7 @@ const db = SQLite.openDatabase(
     error => { console.log('Error: ', error) }
 )
 
-const Todos = () => {
+const Todos = ({ navigation, route }) => {
 
     const [modal, setModal] = useState(false)
     const [startdate, setstartDate] = useState(new Date())
@@ -34,28 +35,17 @@ const Todos = () => {
     const [isTodosAdded, setisTodosAdded] = useState('')
 
     const [users, setusers] = useState([])
+        
     const [activeUserID, setactiveUserID] = useState(0)
-    const [activeUser, setactiveUser] = useState('')
-
+    const [activeUser, setactiveUser] = useState('Select User')
+    
     useEffect(() => {
+        route.params?.email ? setactiveUser(route.params?.email) : null
+        route.params?.id ? setactiveUserID(route.params?.id) : null
         createTable()
-        getActiveUserID()
         getTodos()
         getUsers()
     }, [activeUserID, activeUser])
-
-    const getActiveUserID = async () => {
-        try {
-            const value = await AsyncStorage.getItem('active_user_id')
-            const value1 = await AsyncStorage.getItem('active_user')
-            if (value !== '' && value1 !== '') {
-                setactiveUserID(Number(value))
-                setactiveUser(value1)
-            }
-        } catch (e) {
-            console.log(e)
-        }
-    }
 
     const getUsers = () => {
         db.transaction((tx) => {
@@ -67,6 +57,18 @@ const Todos = () => {
                     for (let i = 0; i < results.rows.length; ++i)
                         temp.push(results.rows.item(i)['email'])
                     setusers(temp)
+                }
+            )
+        })
+    }
+
+    const getUID = (email) =>{
+        db.transaction((tx) => {
+            tx.executeSql(
+                "SELECT id FROM  Users WHERE email=?",
+                [users(0)],
+                (tx, results) => {
+                    return results.rows.item(0).id
                 }
             )
         })
@@ -196,7 +198,7 @@ const Todos = () => {
         setModal(true)
     }
 
-    const updateUser = (selectedUser) => {  
+    const updateUser = (selectedUser) => {
         db.transaction((tx) => {
             tx.executeSql(
                 "SELECT * FROM  Users WHERE email=?",
@@ -206,7 +208,7 @@ const Todos = () => {
                 }
             )
         })
-        setactiveUser(selectedUser) 
+        setactiveUser(selectedUser)
         console.log(activeUser)
         getTodos()
     }
@@ -284,11 +286,20 @@ const Todos = () => {
                 </View>
             )
             }
-            <ActionButton
+            {/* <ActionButton
                 buttonColor="#3871f3"
                 onPress={() => addItem()}
                 buttonText="+"
-            />
+            /> */}
+            <ActionButton buttonColor="#3871f3">
+                <ActionButton.Item buttonColor='#C59026' title="New Task" onPress={()=> addItem()}>
+                    <MaterialCommunityIcons name="clipboard-plus" size={22} color="#fff"/>
+                </ActionButton.Item>
+                <ActionButton.Item buttonColor='#C59026' title="New User" onPress={() => navigation.navigate('Register')}>
+                    <MaterialCommunityIcons name="account-plus"size={22} color="#fff"/>
+                </ActionButton.Item>
+            </ActionButton>
+
             <DatePicker
                 modal
                 title='Set start date'
@@ -335,7 +346,7 @@ const Todos = () => {
                     <Pressable onPress={() => onSave(todosId)}><Text style={styles.btnTxt}>Save</Text></Pressable>
                 </View>
             </Modal>
-        </View>
+        </View >
     )
 }
 
