@@ -35,13 +35,11 @@ const Todos = ({ navigation, route }) => {
     const [isTodosAdded, setisTodosAdded] = useState('')
 
     const [users, setusers] = useState([])
-        
+
     const [activeUserID, setactiveUserID] = useState(0)
     const [activeUser, setactiveUser] = useState('Select User')
     
     useEffect(() => {
-        route.params?.email ? setactiveUser(route.params?.email) : null
-        route.params?.id ? setactiveUserID(route.params?.id) : null
         createTable()
         getTodos()
         getUsers()
