@@ -61,7 +61,7 @@ const Register = ({navigation}) => {
         if(passwordRepeat=='') setPasswordReapeatError('Password confirmation required')
         if(username!="" && email!="" && password!="" && passwordRepeat!=""){
             addUser()
-            navigation.goBack()
+            navigation.navigate('Login')
         }
     }
 

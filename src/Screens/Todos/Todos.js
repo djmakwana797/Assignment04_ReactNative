@@ -38,7 +38,7 @@ const Todos = ({ navigation, route }) => {
 
     const [activeUserID, setactiveUserID] = useState(0)
     const [activeUser, setactiveUser] = useState('Select User')
-    
+
     useEffect(() => {
         createTable()
         getTodos()
@@ -51,22 +51,13 @@ const Todos = ({ navigation, route }) => {
                 "SELECT * FROM  Users WHERE usertoken=?",
                 ['logedin'],
                 (tx, results) => {
-                    var temp = []
-                    for (let i = 0; i < results.rows.length; ++i)
-                        temp.push(results.rows.item(i)['email'])
-                    setusers(temp)
-                }
-            )
-        })
-    }
-
-    const getUID = (email) =>{
-        db.transaction((tx) => {
-            tx.executeSql(
-                "SELECT id FROM  Users WHERE email=?",
-                [users(0)],
-                (tx, results) => {
-                    return results.rows.item(0).id
+                    if (results.rows.length != 0) {
+                        var temp = []
+                        for (let i = 0; i < results.rows.length; ++i)
+                            temp.push(results.rows.item(i)['email'])
+                        setusers(temp)
+                    }
+                    else setisTodosAdded('Please Select user Or Add new user')
                 }
             )
         })
@@ -96,7 +87,8 @@ const Todos = ({ navigation, route }) => {
     }
 
     const getTodos = () => {
-        db.transaction((tx) => {
+        if(activeUserID==0) setisTodosAdded('Please select user or Add new user')
+        else {db.transaction((tx) => {
             tx.executeSql(
                 'SELECT * FROM Todos WHERE user_id=?',
                 [activeUserID],
@@ -114,7 +106,7 @@ const Todos = ({ navigation, route }) => {
                     }
                 }
             )
-        })
+        })}
     }
 
     const setTodoStatusTrue = (id) => {
@@ -290,11 +282,11 @@ const Todos = ({ navigation, route }) => {
                 buttonText="+"
             /> */}
             <ActionButton buttonColor="#3871f3">
-                <ActionButton.Item buttonColor='#C59026' title="New Task" onPress={()=> addItem()}>
-                    <MaterialCommunityIcons name="clipboard-plus" size={22} color="#fff"/>
+                <ActionButton.Item buttonColor='#C59026' title="New Task" onPress={() => addItem()}>
+                    <MaterialCommunityIcons name="clipboard-plus" size={22} color="#fff" />
                 </ActionButton.Item>
                 <ActionButton.Item buttonColor='#C59026' title="New User" onPress={() => navigation.navigate('Register')}>
-                    <MaterialCommunityIcons name="account-plus"size={22} color="#fff"/>
+                    <MaterialCommunityIcons name="account-plus" size={22} color="#fff" />
                 </ActionButton.Item>
             </ActionButton>
 
